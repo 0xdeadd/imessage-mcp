@@ -1,0 +1,22 @@
+[project]
+name = "imessage-mcp"
+version = "0.1.0"
+description = "Local MCP server that lets Claude Code read (and optionally send) macOS Messages"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+dependencies = [
+    "mcp>=1.0.0,<2",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["imessage_mcp"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
