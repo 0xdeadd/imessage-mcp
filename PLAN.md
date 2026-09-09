@@ -1,6 +1,8 @@
 # imessage-mcp: let Claude Code read (and, with confirmation, send) iMessages
 
-Written 2026-09-09. Status: PLAN, awaiting Clint's go.
+Written 2026-09-09. Status: SHIPPED same day. Read tools + gated send built, registered user-wide, pushed to
+github.com/0xdeadd/imessage-mcp. Live send not yet exercised (needs IMESSAGE_SEND=1 and a one-time Messages
+automation prompt). Note: this Mac's chat.db only holds messages from 2026-07-15 onward.
 
 ## Why
 Clint pastes iMessage threads (Steve, Greg/Addison group, Serena, Derek) into Claude Code sessions by hand.
