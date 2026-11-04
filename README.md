@@ -88,3 +88,44 @@ a machine with no Messages history).
 - `imessage_mcp/db.py`: all the read only SQL against `chat.db` and Contacts.
 - `imessage_mcp/server.py`: the FastMCP server and tool definitions.
 - `tests/`: pytest tests against the live database.
+
+## Running as a launchd service (survives Claude Code updates)
+
+macOS grants Full Disk Access to the process that launchd started. When Claude
+Code spawns this server over stdio, that process is Claude Code's own daemon,
+whose binary path changes on every self-update, so the grant dies each time
+(seen 2026-11-03 and 2026-11-04). The fix is to run the server as its own
+launchd agent from a binary path that never changes and talk to it over HTTP.
+
+```
+./install-service.sh
+```
+
+What it does:
+
+- copies the `uv` binary to `~/.local/share/imessage-mcp/imessage-mcp` (a
+  fixed path; never replace that file or the grant breaks)
+- installs `~/Library/LaunchAgents/com.clint.imessage-mcp.plist`, which runs
+  `imessage-mcp run --directory <project> python -m imessage_mcp.server --http`
+  on `127.0.0.1:8471`, KeepAlive, log at `~/Library/Logs/imessage-mcp.log`
+- rewrites `mcpServers.imessage` in `~/.claude.json` to
+  `{"type": "http", "url": "http://127.0.0.1:8471/mcp"}` (backup kept beside it)
+
+Then, once, by hand: System Settings > Privacy & Security > Full Disk Access,
+add `~/.local/share/imessage-mcp/imessage-mcp` and switch it on, and restart
+the agent:
+
+```
+launchctl kickstart -k gui/$(id -u)/com.clint.imessage-mcp
+```
+
+Useful commands:
+
+```
+launchctl print gui/$(id -u)/com.clint.imessage-mcp | grep -E "state|pid"
+tail -f ~/Library/Logs/imessage-mcp.log
+```
+
+The stdio mode still works (`python -m imessage_mcp.server` with no flag) for
+other MCP clients. `--http` or `IMESSAGE_MCP_HTTP=1` selects HTTP;
+`IMESSAGE_MCP_HOST` and `IMESSAGE_MCP_PORT` override the bind address.

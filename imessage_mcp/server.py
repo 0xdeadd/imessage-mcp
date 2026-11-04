@@ -197,7 +197,21 @@ def send(chat: str, text: str) -> str:
 
 
 def main() -> None:
-    mcp.run()
+    """Run over stdio (default) or local HTTP (--http / IMESSAGE_MCP_HTTP=1).
+
+    HTTP mode exists so the server can run as a launchd service under a
+    fixed binary path. macOS ties Full Disk Access to the process that
+    launchd started, so that one grant survives Claude Code updates.
+    """
+    import sys
+
+    use_http = "--http" in sys.argv[1:] or os.environ.get("IMESSAGE_MCP_HTTP") == "1"
+    if not use_http:
+        mcp.run()
+        return
+    mcp.settings.host = os.environ.get("IMESSAGE_MCP_HOST", "127.0.0.1")
+    mcp.settings.port = int(os.environ.get("IMESSAGE_MCP_PORT", "8471"))
+    mcp.run(transport="streamable-http")
 
 
 if __name__ == "__main__":
